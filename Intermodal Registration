@@ -1,0 +1,39 @@
+clear all
+clc
+ 
+R = dicomread('IM_T1W');
+R = double(R)
+R = (R - min(R(:)))/(max(R(:)) - min(R(:)))
+ 
+R1 = dicomread('IM_T2W');
+R1 = double(R1)
+R1 = (R1 - min(R1(:)))/(max(R1(:)) - min(R1(:)))
+ 
+figure, imagesc(R), colorbar,colormap(gray)
+figure, imagesc(R1), colorbar,colormap(gray)
+ 
+F = cell(1,10);
+CC = cell(1,10);
+r = cell(1,10);
+meanr = zeros(1,10);
+normratio = zeros(1,10);
+CrossCorr = zeros(1,10);
+ 
+for i = 1:10
+    F{i} = imrotate(R1,i,'bilinear','crop');
+    figure, imagesc(F{i}), colorbar,colormap(gray)
+    F{i} = F{i} + 0.001
+    r{i} = (R)./(F{i});
+    figure,imagesc(r{i}),colorbar, colormap(gray)
+    meanr(i) = mean(r{i}(:));
+    sigmar(i) = std2(r{i}(:));
+    normratio(i) = sigmar(i)./meanr(i);
+    
+    CC{i} = normxcorr2(R,F{i});
+    figure,surf(CC{i}),shading flat
+    CrossCorr(i) = max(CC{i}(:));
+end
+ 
+ 
+plot(normratio,'b--*'),xlabel('Angle'), ylabel('Normalized Standard Deviation'), hold on
+plot(CrossCorr,'g--o'),xlabel('Angle'),ylabel('Cross Correlation')
