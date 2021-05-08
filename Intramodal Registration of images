@@ -1,0 +1,25 @@
+clear all
+clc
+ 
+R = dicomread('IM_T1W');
+figure, imagesc(R), colorbar,colormap(gray), title('R')
+ 
+%% R1 = aR + b
+a = 30;
+b = 500;
+R1 = (a*R) + b;
+figure, imagesc(R1), colorbar,colormap(gray),title('R1')
+ 
+%% R1_rotated
+F = cell(1,10);
+CC = cell(1,10);
+CrossCorr = zeros(10,1)
+for i = 1:10
+    F{i} = imrotate(R1,i);
+    figure, imagesc(F{i}), colorbar,colormap(gray)
+    CC{i} = normxcorr2(R,F{i});
+    figure,surf(CC{i}),shading flat
+    CrossCorr(i) = max(CC{i}(:))
+end
+ 
+plot(CrossCorr,'b--o'), xlabel('Angle'), ylabel('Cross Correlation Value')
